@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "Prosk v3 – Job Form Autofill",
+  "description": "Sign in, pick a profile, and autofill job forms from your ProskAI profile.",
+  "version": "1.0.0",
+  "action": {
+    "default_title": "Prosk v2",
+    "default_popup": "src/popup/popup.html"
+  },
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://proskai-backend.onrender.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    } 
+  ],
+  "web_accessible_resources": [{
+    "resources": ["content.js"],
+    "matches": ["<all_urls>"],
+    "use_dynamic_url": true
+  }],
+  "minimum_chrome_version": "118"
+}

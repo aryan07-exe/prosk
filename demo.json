@@ -1,0 +1,115 @@
+[
+    {
+      "_id": "68ef24e510b351d761e67075",
+      "userId": "68e8e620325091ccc4523c20",
+      "profileName": "Demo Profile - 1760503013070",
+      "resumeUrl": "https://example.com/resume.pdf",
+      "subscription": "Premium",
+      "firstName": "Alex",
+      "lastName": "Doe",
+      "pronouns": "they/them",
+      "gender": "Non-binary",
+      "ethnicity": "Not Hispanic or Latino",
+      "race": "Two or More Races",
+      "disabilityStatus": "No",
+      "veteranStatus": "No",
+      "email": "alex.doe@example.com",
+      "phoneCountryCode": "+1",
+      "phone": "5551234567",
+      "street": "123 Innovation Drive",
+      "city": "Techville",
+      "state": "California",
+      "country": "USA",
+      "zipCode": "94043",
+      "portfolio": "https://alexdoe.dev",
+      "linkedin": "https://linkedin.com/in/alexdoe",
+      "github": "https://github.com/alexdoe",
+      "twitter": "https://twitter.com/alexdoe",
+      "otherSocialLink": "https://medium.com/@alexdoe",
+      "nationality": "American",
+      "usAuthorized": true,
+      "sponsorshipRequired": false,
+      "citizenshipStatus": "U.S. Citizen",
+      "jobType": "Remote",
+      "preferredLocations": [
+        "San Francisco, CA",
+        "New York, NY",
+        "Remote"
+      ],
+      "currentCTC": "150,000 USD",
+      "expectedCTC": "175,000 USD",
+      "willingToRelocate": true,
+      "noticePeriodAvailable": false,
+      "noticePeriodDurationInDays": 0,
+      "totalExperienceInYears": 5,
+      "skills": [
+        "React",
+        "Node.js",
+        "TypeScript",
+        "AWS",
+        "Docker",
+        "Kubernetes"
+      ],
+      "achievements": [
+        "Won the 2024 TechCrunch Disrupt hackathon",
+        "Published a popular open-source library"
+      ],
+      "experience": [
+        {
+          "company": "Innovate Inc.",
+          "role": "Senior Software Engineer",
+          "experienceType": "Job",
+          "startDate": "2021-06-01T00:00:00.000Z",
+          "isCurrent": true,
+          "description": "Led the development of a scalable microservices architecture."
+        }
+      ],
+      "education": [
+        {
+          "school": "Tech University",
+          "degree": "Master of Science",
+          "fieldOfStudy": "Computer Science",
+          "grade": "3.9 GPA"
+        }
+      ],
+      "projects": [
+        {
+          "title": "AI-Powered Task Manager",
+          "description": "A smart task manager that automatically prioritizes tasks.",
+          "technologies": [
+            "React",
+            "Python",
+            "FastAPI"
+          ],
+          "githubLink": "https://github.com/alexdoe/ai-task-manager"
+        }
+      ],
+      "certifications": [
+        {
+          "name": "AWS Certified Solutions Architect – Associate",
+          "issuer": "Amazon Web Services",
+          "issueDate": "2022-08-15T00:00:00.000Z"
+        }
+      ],
+      "languages": [
+        {
+          "language": "English",
+          "proficiency": "Native"
+        },
+        {
+          "language": "Spanish",
+          "proficiency": "Conversational"
+        }
+      ],
+      "publications": [
+        {
+          "title": "A Novel Approach to State Management in React",
+          "link": "https://tech-journal.com/article123",
+          "description": "Published in the International Journal of Web Development."
+        }
+      ],
+      "createdAt": "2025-10-15T04:36:53.112Z",
+      "updatedAt": "2025-10-15T04:36:53.112Z",
+      "__v": 0
+    }
+  ]
