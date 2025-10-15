@@ -27,6 +27,7 @@ async function signin(email, password) {
   if (!data?.token || !data?.user) {
     throw new Error("Invalid auth response");
   }
+  console.log(data.token)
   
   // Store token and user data in local storage with expiration (30 days)
   const expirationTime = Date.now() + (30 * 24 * 60 * 60 * 1000); // 30 days from now
@@ -47,6 +48,7 @@ async function fetchProfiles(userId) {
     'prosk_user_id',
     'prosk_auth_token'
   ]);
+  console.log("fetched details :"+ prosk_user_id, prosk_auth_token)
   
   // Use provided userId or fall back to stored user ID
   const targetUserId = userId || prosk_user_id;
@@ -60,7 +62,7 @@ async function fetchProfiles(userId) {
     throw new Error("Authentication required");
   }
   
-  const res = await fetch(`${BASE_URL}/api/profiles?userId=${encodeURIComponent(targetUserId)}`, {
+  const res = await fetch(`${BASE_URL}/api/profiles/getdemoprofiles/${targetUserId}`, {
     headers: { "Authorization": `Bearer ${token}` }
   });
   
@@ -73,7 +75,7 @@ async function fetchProfiles(userId) {
     const txt = await res.text().catch(() => "");
     throw new Error(`Failed to fetch profiles (${res.status}): ${txt}`);
   }
-  
+  console.log("profiles fetchd is "+res)
   return await res.json();
 }
 
