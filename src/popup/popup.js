@@ -2,169 +2,155 @@
 const loginView = document.getElementById("login-view");
 const profilesView = document.getElementById("profiles-view");
 const loginForm = document.getElementById("login-form");
-const emailEl = document.getElementById("email");
-const passwordEl = document.getElementById("password");
+const loginBtn = document.getElementById("login-btn");
 const loginErr = document.getElementById("login-error");
-
 const profilesSelect = document.getElementById("profiles-select");
 const fillBtn = document.getElementById("fill-btn");
+const useProfileBtn = document.getElementById("use-profile-btn"); // Get the new button
 const profilesErr = document.getElementById("profiles-error");
 const preview = document.getElementById("profile-preview");
+const signoutBtn = document.getElementById("signout-btn");
 
-// State
-let currentUser = null;
 let profiles = [];
 let selectedProfile = null;
 
+// --- UI Functions ---
 function showLogin() {
   loginView.classList.remove("hidden");
   profilesView.classList.add("hidden");
 }
+
 function showProfiles() {
   loginView.classList.add("hidden");
   profilesView.classList.remove("hidden");
 }
 
+// --- Helper for background communication ---
 async function bgSend(type, payload) {
-  return new Promise((resolve) => {
-    chrome.runtime.sendMessage({ type, payload }, resolve);
-  });
+  const response = await chrome.runtime.sendMessage({ type, payload });
+  if (response.ok) {
+    return response;
+  } else {
+    throw new Error(response.error || "An unknown error occurred in the background script.");
+  }
 }
 
+// --- Render Functions ---
 function renderProfilesDropdown() {
   profilesSelect.innerHTML = "";
+  if (profiles.length === 0) {
+    profilesErr.textContent = "No profiles found. Please create one in the dashboard.";
+    useProfileBtn.disabled = true;
+    fillBtn.disabled = true;
+    return;
+  }
+  
   profiles.forEach((p, idx) => {
     const opt = document.createElement("option");
     opt.value = String(idx);
-    opt.textContent =
-      p.profileName || p.details?.profileName || `Profile ${idx + 1}`;
+    opt.textContent = p.profileName;
     profilesSelect.appendChild(opt);
   });
-  profilesSelect.selectedIndex = 0;
-  selectedProfile = profiles[0] || null;
-  fillBtn.disabled = !selectedProfile;
+  
+  updateSelectedProfile();
+}
+
+function renderPreview(profile) {
+  if (!profile) {
+    preview.textContent = "No profile selected.";
+    return;
+  }
+  const previewData = {
+    Name: `${profile.firstName} ${profile.lastName}`,
+    Email: profile.email,
+    Experience: `${profile.totalExperienceInYears || 0} years`,
+  };
+  preview.textContent = JSON.stringify(previewData, null, 2);
+}
+
+function updateSelectedProfile() {
+  const idx = Number(profilesSelect.value);
+  selectedProfile = profiles[idx] || null;
+  useProfileBtn.disabled = !selectedProfile;
+  fillBtn.disabled = true; // Keep fill button disabled until a profile is "used"
   renderPreview(selectedProfile);
 }
 
-function renderPreview(p) {
-  const shallow = Object.fromEntries(
-    Object.entries(p).filter(([k, _]) =>
-      [
-        "profileName",
-        "firstName",
-        "lastName",
-        "email",
-        "phone",
-        "jobType",
-      ].includes(k)
-    )
-  );
-  // If API returns nested details, try to surface basics
-  if (!shallow.firstName && p.details?.personalInfo?.firstName) {
-    shallow.firstName = p.details.personalInfo.firstName;
-    shallow.lastName = p.details.personalInfo.lastName || "";
-  }
-  if (!shallow.email && p.details?.contactInfo?.email) {
-    shallow.email = p.details.contactInfo.email;
-  }
-  preview.textContent = JSON.stringify(shallow, null, 2);
-}
-
-// Try to restore a logged-in user (from storage)
-(async () => {
-  const { prosk_user } = await chrome.storage.local.get(["prosk_user"]);
-  if (prosk_user) {
-    currentUser = prosk_user;
-    try {
-      const resp = await bgSend("FETCH_PROFILES", {
-        userId: currentUser._id || currentUser.id || currentUser.userId,
-      });
-      if (resp?.ok) {
-        profiles = resp.profiles || [];
-        showProfiles();
-        renderProfilesDropdown();
-      } else {
-        showLogin();
-      }
-    } catch {
-      showLogin();
-    }
-  } else {
-    showLogin();
-  }
-})();
-
-// Login submit
+// --- Event Listeners ---
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   loginErr.textContent = "";
+  loginBtn.textContent = "Signing in...";
+  loginBtn.disabled = true;
+
   try {
-    const email = emailEl.value.trim();
-    const password = passwordEl.value;
-
-    // Sign in the user
-    const resp = await bgSend("SIGNIN", { email, password });
-    if (!resp?.ok) throw new Error(resp?.error || "Sign-in failed");
-
-    // Store user data and update UI
-    currentUser = resp.user;
-
-    // Fetch profiles - no need to pass userId as it will be retrieved from storage
-    const resp2 = await bgSend("FETCH_PROFILES", {});
-    if (!resp2?.ok) throw new Error(resp2?.error || "Failed to fetch profiles");
-
-    profiles = resp2.profiles || [];
+    await bgSend("SIGNIN", { email: document.getElementById("email").value.trim(), password: document.getElementById("password").value });
+    const profileResponse = await bgSend("FETCH_PROFILES");
+    
+    profiles = profileResponse.profiles || [];
     showProfiles();
     renderProfilesDropdown();
   } catch (err) {
-    console.error("Login error:", err);
-    loginErr.textContent = err.message || "An error occurred during sign in";
+    loginErr.textContent = err.message;
+  } finally {
+    loginBtn.textContent = "Sign in";
+    loginBtn.disabled = false;
   }
 });
 
-// Change selected profile
-profilesSelect.addEventListener("change", (e) => {
-  const idx = Number(e.target.value);
-  selectedProfile = profiles[idx] || null;
-  fillBtn.disabled = !selectedProfile;
-  renderPreview(selectedProfile);
-});
+profilesSelect.addEventListener("change", updateSelectedProfile);
 
-// Click Fill
-fillBtn.addEventListener("click", async () => {
+// ✨ NEW EVENT LISTENER FOR THE "USE PROFILE" BUTTON ✨
+useProfileBtn.addEventListener("click", async () => {
+  if (!selectedProfile) return;
+
   profilesErr.textContent = "";
-  fillBtn.disabled = true;
-  fillBtn.textContent = "Filling...";
-
-  if (!selectedProfile) {
-    const errorMsg = "Please select a profile first.";
-    console.error("[Popup]", errorMsg);
-    profilesErr.textContent = errorMsg;
-    fillBtn.disabled = false;
-    fillBtn.textContent = "Fill";
-    return;
-  }
+  useProfileBtn.textContent = "Selecting...";
+  useProfileBtn.disabled = true;
 
   try {
-    console.log("[Popup] Sending profile to background:", {
-      id: selectedProfile._id, // ✅ Correctly logs the _id
-      name: selectedProfile.profileName,
-    });
-
-    const resp = await bgSend("SELECT_PROFILE", { profile: selectedProfile });
-    console.log("[Popup] Received response from background:", resp);
-
-    if (!resp?.ok) {
-      throw new Error(resp?.error || "Failed to fill form. Please try again.");
-    }
-
-    console.log("[Popup] Form fill successful, closing popup");
-    window.close();
+    const response = await bgSend("SELECT_PROFILE", { profile: selectedProfile });
+    console.log("Popup received confirmation:", response.message);
+    profilesErr.textContent = `Profile "${selectedProfile.profileName}" is now active!`;
+    fillBtn.disabled = false; // Enable the "Fill this page" button
   } catch (e) {
-    const errorMsg = e.message || "An error occurred while filling the form";
-    console.error("[Popup] Error:", errorMsg, e);
-    profilesErr.textContent = errorMsg;
-    fillBtn.disabled = false;
-    fillBtn.textContent = "Fill";
+    profilesErr.textContent = e.message;
+  } finally {
+    useProfileBtn.textContent = "Use Profile";
+    useProfileBtn.disabled = false;
   }
 });
+
+// Event listener for the "Fill this page" button (can be used for form filling later)
+fillBtn.addEventListener("click", async () => {
+  if (!selectedProfile) {
+    profilesErr.textContent = "Please select and 'Use' a profile first.";
+    return;
+  }
+  console.log("LOGIC FOR FILLING THE PAGE GOES HERE. Profile to use:", selectedProfile.profileName);
+  window.close();
+});
+
+
+signoutBtn.addEventListener("click", async () => {
+  await bgSend("SIGNOUT");
+  showLogin();
+});
+
+// --- Initial Load ---
+(async () => {
+  try {
+    const { prosk_user } = await chrome.storage.local.get(["prosk_user"]);
+    if (prosk_user) {
+      const profileResponse = await bgSend("FETCH_PROFILES");
+      profiles = profileResponse.profiles || [];
+      showProfiles();
+      renderProfilesDropdown();
+    } else {
+      showLogin();
+    }
+  } catch (error) {
+    console.warn("Could not auto-login:", error.message);
+    showLogin();
+  }
+})();

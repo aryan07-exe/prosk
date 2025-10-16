@@ -2,15 +2,14 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Prosk v2</title>
+  <title>ProskAI Filler</title>
   <link rel="stylesheet" href="popup.css" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 </head>
 <body>
   <div id="app">
-    <!-- Login -->
     <section id="login-view">
-      <h1>Sign in</h1>
+      <h1>Sign in to ProskAI</h1>
       <form id="login-form">
         <label>Email
           <input type="email" id="email" placeholder="you@example.com" required />
@@ -23,18 +22,18 @@
       <p id="login-error" class="error"></p>
     </section>
 
-    <!-- Profile selection -->
     <section id="profiles-view" class="hidden">
-      <h1>Select a profile</h1>
+      <h1>Select a Profile</h1>
       <div class="row">
         <select id="profiles-select"></select>
-        <button id="fill-btn" disabled>Fill this page</button>
+        <button id="use-profile-btn">Use Profile</button>
       </div>
-      <div id="profile-preview"></div>
+      <button id="fill-btn" disabled>Fill this page</button>
+      <pre id="profile-preview"></pre>
       <p id="profiles-error" class="error"></p>
+      <button id="signout-btn" class="secondary">Sign Out</button>
     </section>
   </div>
-
   <script src="popup.js" type="module"></script>
 </body>
 </html>
