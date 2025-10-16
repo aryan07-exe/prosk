@@ -81,7 +81,7 @@ async function fetchProfiles(userId) {
 
 async function setSelectedProfileAndFill(profile) {
   try {
-    if (!profile || !profile.id) {
+    if (!profile || !profile._id) {
       throw new Error("Invalid profile data");
     }
     
